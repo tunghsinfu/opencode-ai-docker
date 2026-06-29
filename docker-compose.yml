@@ -1,0 +1,31 @@
+services:
+  opencode-ai:
+    user: "${UID}:${GID}"
+    platform: linux/amd64
+    build:
+      context: .
+      args:
+        OPENCODE_WORKDIR: ${OPENCODE_WORKDIR:-/workspace}
+        OPENCODE_HOME: ${OPENCODE_HOME:-/home/ubuntu}
+    image: ${OPENCODE_IMAGE_NAME:-opencode-ai:latest}
+    container_name: ${OPENCODE_CONTAINER_NAME:-opencode_container}
+    environment:
+      OPENCODE_WORKDIR: ${OPENCODE_WORKDIR:-/workspace}
+      OPENCODE_HOME: ${OPENCODE_HOME:-/home/ubuntu}
+      OPENCODE_PORT: ${OPENCODE_PORT:-4096}
+      OPENCODE_HOST: ${OPENCODE_HOST:-0.0.0.0}
+    volumes:
+      - ${OPENCODE_CONFIG_HOST_PATH:-./data/config}:${OPENCODE_HOME:-/home/ubuntu}/.config/opencode
+      - ${OPENCODE_DATA_HOST_PATH:-./data/local}:${OPENCODE_HOME:-/home/ubuntu}/.local/share/opencode
+      - ${OPENCODE_WORKSPACE_HOST_PATH:-./workspace}:${OPENCODE_WORKDIR:-/workspace}
+    working_dir: ${OPENCODE_WORKDIR:-/workspace}
+    ports:
+      - "${OPENCODE_PORT:-4096}:${OPENCODE_PORT:-4096}"
+    stdin_open: true
+    tty: true
+    command:
+      - bash
+      - -lc
+      - |
+        cd "${OPENCODE_WORKDIR:-/workspace}" && \
+        exec opencode web --port "${OPENCODE_PORT:-4096}" --hostname "${OPENCODE_HOST:-0.0.0.0}"
