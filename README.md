@@ -1,151 +1,116 @@
-# OpenCode AI Docker 開發環境
+# OpenCode AI Docker
 
-這個專案提供一個可直接啟動的 Docker Compose 環境，讓你在容器中使用 OpenCode AI，並把需要自行調整的設定抽象成使用者可配置的項目。
+A Docker Compose environment for running [OpenCode AI](https://opencode.ai) in a containerized development environment.
 
-## 這個專案做什麼
+## What This Does
 
-- 使用 Docker 容器化 OpenCode AI
-- 預先安裝 Ubuntu、Node.js、npm 與 OpenCode AI
-- 將工作目錄、設定檔與持久化資料改成可由使用者自行調整的設定
-- 可透過 Web 介面使用 OpenCode
+- Containerizes OpenCode AI with Docker
+- Pre-installs Ubuntu, Node.js, npm, and OpenCode AI
+- Provides customizable mount paths, ports, and user directories
+- Exposes a web interface for using OpenCode
 
-## 專案檔案
+## Project Files
 
-- [Dockerfile](Dockerfile)：定義容器映像內容與預設路徑
-- [docker-compose.yml](docker-compose.yml)：定義服務、掛載路徑、埠號與啟動命令
-- [README.md](README.md)：使用說明
-- [.env.example](.env.example)：可直接複製成 .env 的範例設定檔
+- [Dockerfile](Dockerfile) — Defines the container image and default paths
+- [docker-compose.yml](docker-compose.yml) — Defines services, volumes, ports, and startup command
+- [.env.example](.env.example) — Example config file; copy to `.env` and customize
+- [README.md](README.md) — This file
 
-## 前置需求
+## Prerequisites
 
-請先確認你的主機已安裝：
+- Docker Engine or Docker Desktop
+- WSL2 (if using Docker on Windows)
 
-- Docker Engine 或 Docker Desktop
-- WSL2（如果你是在 Windows 上使用 Docker）
-
-可先確認 Docker 是否可用：
+Verify your setup:
 
 ```bash
 docker compose version
 ```
 
-## 快速開始
+## Quick Start
 
-1. 進入專案資料夾
+1. Clone this repository and enter the directory:
 
 ```bash
-cd /mnt/d/OneDrive - Acer/WSL/docker/opencode
+git clone <repo-url>
+cd opencode-ai-docker
 ```
 
-2. 建立環境設定檔（可選）
-
-如果你想調整掛載路徑、埠號或容器名稱，請先複製範例檔：
+2. (Optional) Create a `.env` file to customize settings:
 
 ```bash
 cp .env.example .env
 ```
 
-之後依照你的需求修改 [.env](.env) 內容。
-
-3. 建立映像檔
+3. Build the image:
 
 ```bash
 docker compose build
 ```
 
-4. 啟動容器
+4. Start the container:
 
 ```bash
 docker compose up -d
 ```
 
-5. 開啟瀏覽器
+5. Open your browser to:
 
-請前往：
-
-```text
+```
 http://localhost:4096
 ```
 
-## 可由使用者設定的項目
+## Configurable Variables
 
-這次重構後，以下設定可以由使用者自行調整：
+All settings can be customized in `.env`:
 
-- 持久化資料路徑：
-  - `OPENCODE_CONFIG_HOST_PATH`
-  - `OPENCODE_DATA_HOST_PATH`
-  - `OPENCODE_WORKSPACE_HOST_PATH`
-- 容器內工作目錄與使用者家目錄：
-  - `OPENCODE_WORKDIR`
-  - `OPENCODE_HOME`
-- Web 介面埠號與主機位址：
-  - `OPENCODE_PORT`
-  - `OPENCODE_HOST`
-- 容器名稱與映像名稱：
-  - `OPENCODE_CONTAINER_NAME`
-  - `OPENCODE_IMAGE_NAME`
+| Variable | Default | Description |
+|---|---|---|
+| `OPENCODE_IMAGE_NAME` | `opencode-ai:latest` | Docker image name |
+| `OPENCODE_CONTAINER_NAME` | `opencode_container` | Docker container name |
+| `OPENCODE_CONFIG_HOST_PATH` | `./data/config` | Host path for OpenCode config |
+| `OPENCODE_DATA_HOST_PATH` | `./data/local` | Host path for persistent data |
+| `OPENCODE_WORKSPACE_HOST_PATH` | `./workspace` | Host path for workspace files |
+| `OPENCODE_HOME` | `/home/ubuntu` | Container home directory |
+| `OPENCODE_WORKDIR` | `/workspace` | Container working directory |
+| `OPENCODE_PORT` | `4096` | Web UI port |
+| `OPENCODE_HOST` | `0.0.0.0` | Web UI bind address |
+| `OPENCODE_SERVER_PASSWORD` | `opencode` | Password to secure the web UI (change in production) |
+| `OPENCODE_SERVER_USERNAME` | `opencode` | Basic auth username (default: opencode) |
 
-你可以在 [.env](.env) 中直接覆寫這些值。
+## Default Behavior
 
-## 預設行為
+If no `.env` overrides are provided, the defaults are used automatically:
 
-若沒有提供任何覆寫設定，專案會使用下列預設值：
+- Workspace: `./workspace`
+- Config data: `./data/config`
+- Persistent data: `./data/local`
+- Port: `4096`
 
-- 工作目錄：`./workspace`
-- 設定資料：`./data/config`
-- 持久化資料：`./data/local`
-- Web 介面埠號：`4096`
-
-這樣可以避免把路徑寫死在專案中，讓你在不同機器或不同專案資料夾時都比較方便移植。
-
-## 常用指令
-
-啟動服務：
+## Common Commands
 
 ```bash
+# Start services
 docker compose up -d
-```
 
-查看日誌：
-
-```bash
+# View logs
 docker compose logs -f
-```
 
-停止服務：
-
-```bash
+# Stop services
 docker compose down
-```
 
-重新建置：
-
-```bash
+# Rebuild from scratch
 docker compose build --no-cache
-```
 
-進入容器終端：
-
-```bash
+# Enter the container
 docker compose exec opencode-ai bash
 ```
 
-## 疑難排解
+## Troubleshooting
 
-如果無法正常開啟 Web 介面，請先確認：
+If the web interface is not accessible:
 
-- 容器是否成功啟動：
-
-```bash
-docker compose ps
-```
-
-- 是否有錯誤訊息：
-
-```bash
-docker compose logs
-```
-
-- 連接埠是否被其他程式占用
-
-如果你需要調整埠號，請修改 [.env](.env) 中的 `OPENCODE_PORT`，並確保 [docker-compose.yml](docker-compose.yml) 也會套用到新的設定。
+- Check container status: `docker compose ps`
+- View logs: `docker compose logs`
+- Verify the port is not already in use
+- Adjust `OPENCODE_PORT` in `.env` if needed

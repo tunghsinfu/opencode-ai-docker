@@ -10,7 +10,7 @@ ENV OPENCODE_HOME=${OPENCODE_HOME} \
     XDG_DATA_HOME=${OPENCODE_HOME}/.local/share \
     XDG_STATE_HOME=${OPENCODE_HOME}/.local/state
 
-# 1. 安裝基礎工具與 Node.js / npm
+# 1. Install base tools and Node.js / npm
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
@@ -23,14 +23,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  && echo "ubuntu ALL=(ALL) NOPASSWD: /usr/bin/apt-get, /usr/bin/apt" > /etc/sudoers.d/ubuntu \
  && chmod 0440 /etc/sudoers.d/ubuntu
 
-# 2. 全域安裝 OpenCode AI
+# 2. Install OpenCode AI globally
 RUN npm install -g opencode-ai
 
-# 3. 建立一個假的 xdg-open 封印自動開啟瀏覽器的錯誤
+# 3. Create a dummy xdg-open to suppress browser auto-open errors
 RUN echo '#!/bin/sh\nexit 0' > /usr/local/bin/xdg-open \
  && chmod +x /usr/local/bin/xdg-open
 
-# 4. 事先建立 XDG 標準目錄，避免非 root 使用者在啟動時遇到權限問題
+# 4. Pre-create XDG standard directories to avoid permission issues for non-root users
 RUN mkdir -p "${OPENCODE_HOME}/.config/opencode" \
              "${OPENCODE_HOME}/.local/state" \
              "${OPENCODE_HOME}/.local/share/opencode" \
@@ -40,5 +40,5 @@ RUN mkdir -p "${OPENCODE_HOME}/.config/opencode" \
 USER ubuntu
 WORKDIR ${OPENCODE_WORKDIR}
 
-# 5. 預先將 GitHub 加入 SSH 信任主機清單，避免首次連線時卡住
+# 5. Pre-add GitHub to SSH known hosts to avoid first-connection prompt
 RUN ssh-keyscan -T 5 github.com 2>/dev/null >> "${OPENCODE_HOME}/.ssh/known_hosts" || true
