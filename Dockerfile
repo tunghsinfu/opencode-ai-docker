@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 ubuntu:latest
+FROM ubuntu:latest
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG OPENCODE_HOME=/home/ubuntu
